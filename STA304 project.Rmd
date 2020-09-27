@@ -1,0 +1,135 @@
+---
+title: "WELLBEING DEMOGRAPHIC CHARACTERISTICS OF TORONTO"
+author: "AgnesChu"
+date: "9/27/2020"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## Abstract
+
+The paper purposed to study the relationship between total population and total area of Toronto neighbourhood. The study focused on the data visualization tools such as barplots in finding which of the neighbourhood is densley populated, highest number of unemployed people, and many other aspects.The results of the study showed that the most densely populated neighbourhood in Toronto is Bridle Path-Sunnybrook-York Mills with 82100 people followed by Malvern with 44315 people, and Milliken with 262605 people. Consequently, South Riverdale has the highest number of unemployed people (1130 people), followed by Islington-City Centre West with 1110 unemployed peple, and Bendale with 1095 unemployed people.
+
+## Introduction
+People consider a place to be suitable for residence depending on several factors.
+Some people might consider looking a neighbourhood which is rated to be one of the best neighbourhood for raising a family. The said neighbourhood should have several parks, schools, subway stations, Danforth Ave for restaurants, libraries with several fairs and events planned during summers. One might say these things can be found in all parts of Toronto but the affordability aspect need also to be considered. Accessibility of the neighbourhood from downtown and a good mix of residents from across the globe are among major factors. Some places might be easily accessible but not affordable depending on the income of family, and thus high shelter cost will only attract people with high level of income (Leslie & Hunt, 2013). 
+Consequently, different categories of people have different priorities on places of residence. Some might prefer places which are near to the recreational ammenities such as beaches, and other places, whereas others might be looking for quite place (Zaami, 2015). All these depends on taste and preferences. Thus, some places might suits students, professionals, young families, and families. Besides, Such places are perfect for beach days, Canada Day fireworks, Boardwalk strolls. Also, the place is good for a runner since it is a perfect route from door, down the beach boardwalk and back down Queen for a solid 8km loop (Leslie & Hunt, 2013). Therefore, several factors determine the population of the neighbourhood.
+
+
+## Data discussion
+The study employed data named welllbeing toronto demographics data from opendatatoronto package in R. The data was stored in three excel sheets. The first sheet contain meta data, raw data for 2008 which had 140 observations and 85 variables, and raw data for 2011 which had 41 variables and 140 observations. Since the two raw data had different dimensions, and merging them could be a problem, and thus, we used 2008 raw data in our analysis. Since the data composed of demographic aspects of Toronto most of the variables was population related of variables such as; Total population, total area, population of males, population of females, population of latin American, Africans, Asians per neighbourhood , and many more. The data also contain the employment related variables which included; number of unemployed, not in labour force, in labour force. On the other hand, some variables were education related such as; number of less than grade 9, with college certificate, with bachelor degree or higher. All these variables except neighbourhood and neighbourhood ID are quatitative in nature. However, we only considered few variables in this study, which we believed it could provide greater insight about the Toronto neighbourhood.
+
+
+```{r cars}
+
+library(opendatatoronto)
+packages <- list_packages(limit = 10)
+packages
+browse_package
+```
+
+
+
+
+
+```{r}
+library(dplyr)
+
+wellbeing_toronto_demographics <- list_package_resources("https://open.toronto.ca/dataset/wellbeing-toronto-demographics/") %>%
+  filter(name == "wellbeing-toronto-demographics") %>%
+  get_resource()
+str(wellbeing_toronto_demographics, max.level = 1)
+wellbeing<-wellbeing_toronto_demographics[["RawData-Ref Period 2008"]]
+wellbeing2<-wellbeing_toronto_demographics[["RawData-Ref Period 2011"]]
+str(wellbeing)
+```
+
+```{r}
+library(tidyverse)
+my_data <- as_tibble(wellbeing)
+my_data
+```
+
+## Results and Findings
+
+First, we converted the data into analyzable format using tidyverse libray in R. Further we made the first row of the sheet to be the variable names of the data since we establshed that the first row of the data were variables names. Furthermore, we subsetted data based on different variables of interest. The study majorly concentrated on a portion of the data and not the whole dataset. Furthermore, we used data visualization tools to determine neighbourhoods with highest number of population among other aspects. Data visualization tools provide insights about the pattern in a dataset (Zastrow, 2015). The results of analysis are discusssed in detail in this section.
+```{r}
+library(dplyr)
+dat_1<-as.matrix(my_data)
+colnames(dat_1) =dat_1[1,]
+my_data1<-as.data.frame(dat_1)
+my_data<-my_data1[-1,]
+
+```
+
+
+```{r}
+#Subsetting data based on densely populated neighbourhood
+my_data$`Total Area`<-as.numeric(my_data$`Total Area`)
+newdata <-my_data[order(-my_data[,3]),]
+new_data<-newdata[c(1:10),]
+#Subsetting data based on high rate of unemployment
+newdata1<-my_data[order(my_data[,66]),]
+new_data1<-newdata1[c(1:10),]
+#Subsetting data based on high shelter cost
+newdata2<-my_data[order(-my_data[,73]),]
+new_data2<-newdata2[c(1:10),]
+#Subsetting data based on high rate of unemployment
+newdata3<-my_data[order(-my_data[,82]),]
+new_data3<-newdata3[c(1:10),]
+```
+
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+p2 <- ggplot() + geom_bar(aes(y =new_data$`Total Population`, x =new_data$`Total Area`,fill=new_data$Neighbourhood), data =new_data,stat="identity")
+p3 <- ggplot() + geom_bar(aes(y =new_data$`Pop - Males`, x =new_data$`Total Area`,fill=new_data$Neighbourhood), data =new_data,stat="identity")
+p4 <- ggplot() + geom_bar(aes(y =new_data$`Pop - Females`, x =new_data$`Total Area`,fill=new_data$Neighbourhood), data =new_data,stat="identity")
+grid.arrange(p2,p4,p3)
+```
+
+The chart above showed that top 10 most densely populated neighbourhood in Toronto is Bridle Path-Sunnybrook-York Mills with 82100 people followed by Malvern with 44315 people, and Milliken with 262605 people.In terms of the the number of males, it is evident that Eringate-Centennial-West Deane has the highest number of males, followed by Humber Summit, and ridle Path-Sunnybrook-York Mills. On the other hand, Eringate-Centennial-West Deane has the highest number of females, followed by Humber Summit and Bridle Path-Sunnybrook-York Mills,respectively. The chart above also helps in showing the total area of each neighbourhood with respect to the number of people living within the neighbourhood.
+
+```{r}
+p2 <- ggplot() + geom_bar(aes(y =new_data1[,66], x =new_data1[,1]),
+                          data =new_data1,stat="identity",fill="Blue")+coord_flip()
+p2
+```
+
+The chart above shows top 10 neighbourhood based on the number of unemployed people. It can be seen that South Riverdale has the highest number of unemployed people (1130 people), followed by Islington-City Centre West with 1110 unemployed peple, and Bendale with 1095 unemployed people. On the other hand, KInfsview village-The Westway has the least number of unemployed people 1010.
+
+
+```{r}
+p3 <- ggplot() + geom_bar(aes(y =new_data3$`Average Family Income`,
+                              x =new_data3$`Total Population`,fill=new_data$Neighbourhood), data =new_data3,stat="identity")
+p4 <- ggplot() + geom_bar(aes(y =new_data2$`High Shelter Costs`,
+                              x =new_data2$`Total Population`,
+                              fill=new_data2$Neighbourhood), 
+                          data =new_data2,stat="identity")
+grid.arrange(p4,p3)
+```
+
+The first chart above shows top 10 neighbourhood based on high shelter cost. It is evident that Princess-Rosethorn has the highest shelter cost, followed by Mount Olive-Silverstone-Jamestown (3600), and Waterfront Communitoes-The Island. Besides, Elms-Old Rexdale has the lowest shelter cost of the 10 neighbourhood considered in this study.
+
+The second chart showed top 10 neighbourhood with high average family income. It can be seen that Milken has the highest average family income (71300), followed by Stonegate-Queensway (70885), and Humber Summit (69750), respectively. On the other hand, Agincourt South-Malvern West has the least average family income.
+
+The findings of the study are useful in informing families who are searching for a neighbourhood with the lowest shelter cost to reside in. Hence, the information is useful to the public and other stakeholders, since it informed them on different demographic of neighbourhood within Toronto. Besides, the study helps the administrative units and city planning in addressing problems experienced by residence of Toronto.
+However, the study did not purpose the causative factors of the current situation in this neighbourhood, for instance, the reason why some neighbourhood has the higher number of unemployed whereas others has low. Therefore, there is need to conduct a study which provide indepth insight of the neighbourhoods within Toronto. Besides, the study highlighted the number of unemployed people which is not a good measure of unemployment, instead there is a need to use the rate of unemployment which is a better measure.
+
+
+## References
+Leslie, D., & Hunt, M. (2013). Securing the neoliberal city: Discourses of creativity and priority neighborhoods in Toronto, Canada. Urban Geography, 34(8), 1171-1192.
+
+Zaami, M. (2015). 'I fit the description': experiences of social and spatial exclusion among Ghanaian immigrant youth in the Jane and Finch neighbourhood of Toronto. Canadian Ethnic Studies, 47(3), 69-89.
+
+Zastrow, M. (2015). Data visualization: Science on the map. Nature News, 519(7541), 119.
+
+
